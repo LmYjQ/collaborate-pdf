@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF.js 文件上传示例</title>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.210/pdf.min.js"></script> -->
+  <!-- <script src="../../node_modules/pdfjs-dist/build/pdf.mjs" type="module"></script> -->
+
+</head>
+<body>
+  <h1>PDF.js 文件上传示例</h1>
+  <!-- <input type="file" id="pdf-file" accept="application/pdf">
+  <input type="file" id="pdf-file" name="pdf-file" accept="application/pdf">
+
+  <button type="button" onclick="uploadFile()">确认</button>   -->
+
+  <form id="uploadForm" enctype="multipart/form-data">  
+    <input type="file" id="pdf-file" name="pdf-file">  
+    <button type="button" onclick="uploadFile()">上传</button>  
+  </form>  
+  <div id="upload-status">status</div>  
+
+<!-- 
+  <div id="pdf-viewer"></div>
+
+  <script id="script" type="module">
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+    '../../node_modules/pdfjs-dist/build/pdf.worker.mjs';
+  </script> -->
+
+    <script>
+        var globalVariable = localStorage.getItem('myGlobalVariable');  
+  
+  if (!globalVariable) {  
+    // 如果变量不存在，则设置它的初始值  
+    globalVariable = '初始值';  
+    localStorage.setItem('myGlobalVariable', globalVariable);  
+  }  
+
+  var myDiv = document.getElementById('upload-status');  
+   myDiv.textContent = globalVariable;  
+
+    function uploadFile() { 
+
+
+  // 获取文件输入元素和上传状态元素  
+  var fileInput = document.getElementById('pdf-file');  
+  var uploadStatus = document.getElementById('upload-status');  
+  
+  // 检查是否有文件被选中  
+  if (fileInput.files && fileInput.files[0]) {  
+    // 创建FormData对象  
+    var formData = new FormData();  
+  
+    // 将文件添加到FormData对象中  
+    formData.append('pdfFile', fileInput.files[0]);  
+  
+    // 初始化XMLHttpRequest对象  
+    var xhr = new XMLHttpRequest();  
+  
+    // 设置请求类型和URL  
+    xhr.open('POST', 'http://127.0.0.1:5000/upload', true);  
+  
+    // 设置请求完成后的处理函数  
+    xhr.onloadend = function () {  
+
+      if (xhr.status === 200) {  
+        // 请求成功，服务器返回了响应  
+        var response = JSON.parse(xhr.responseText);  
+        // 假设服务器返回了包含UUID的JSON对象  
+        if (response && response.uuid) {  
+          // uploadStatus.textContent = '上传成功，UUID: ' + response.uuid;  
+          globalVariable = '上传成功，查看地址: 127.0.0.1:8080/view.html?file=' + response.uuid;  
+          localStorage.setItem('myGlobalVariable', globalVariable);  
+        } else {  
+          uploadStatus.textContent = '上传成功，但未收到UUID。';  
+        }  
+      } else {  
+        // 请求失败  
+        uploadStatus.textContent = '上传失败，状态码：' + xhr.status;  
+      }  
+    };  
+
+    // 设置请求错误的处理函数  
+    xhr.onerror = function () {  
+      uploadStatus.textContent = '上传发生错误。';  
+    };  
+  
+    // 发送请求  
+    xhr.send(formData);  
+  } else {  
+    // 如果没有文件被选中，给出提示  
+    uploadStatus.textContent = '请选择一个文件。';  
+  }  
+  return false;
+}
+    // var uuidValue = '';
+
+    // document.getElementById('pdf-file').addEventListener('change', function(event) {
+    //   var file = event.target.files[0];
+
+    //   var formData = new FormData();
+    //   formData.append('pdfFile', file);
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open('POST', 'http://127.0.0.1:5000/upload'); // 发送到服务器的上传路径
+    //   xhr.onreadystatechange = function() {
+    //     if (xhr.readyState === XMLHttpRequest.DONE) {
+    //       if (xhr.status === 200) {
+    //         var response = JSON.parse(xhr.responseText);
+    //         uuidValue = response.uuid;
+    //         document.getElementById('uuidContainer').innerText = 'UUID: ' + uuidValue;
+    //         console.log('上传成功');
+    //       } else {
+    //         console.error('上传失败');
+    //       }
+    //     }
+    //   };
+    //   xhr.send(formData);
+    // });
+
+  </script>
+</body>
+</html>
+
