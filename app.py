@@ -3,6 +3,7 @@ import os
 from flask_cors import CORS
 import uuid
 
+
 app = Flask(__name__)
 CORS(app)  # 启用 CORS
 
@@ -34,3 +35,5 @@ def view_pdf(filename):
     
 if __name__ == '__main__':
     app.run(debug=True)
+    #socketio.run(app, debug=True, port=5000)
+

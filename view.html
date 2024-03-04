@@ -15,6 +15,8 @@
     <button id="next">Next</button>
     <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
   </div>
+
+    <button onclick="sendMessage()">Send Message</button>  
   
   <!-- <input type="text" id="pdf-url" placeholder="Enter PDF URL"> -->
   <!-- <button onclick="loadPDF()">Load PDF</button> -->
@@ -27,9 +29,17 @@
   <script id="script" type="module">
     pdfjsLib.GlobalWorkerOptions.workerSrc =
     './pdfjs-dist/build/pdf.worker.mjs';
+  /**
+   * Get page info from document, resize canvas accordingly, and render page.
+   * @param num Page number.
+   */
+  
+  
+  </script>
 
+<script type="module">  
 
-    var pdfDoc = null,
+var pdfDoc = null,
       pageNum = 1,
       pageRendering = false,
       pageNumPending = null,
@@ -38,11 +48,69 @@
       ctx = canvas.getContext('2d');
 
 
-  
+  const ws = new WebSocket('ws://localhost:8765');  
+
+  ws.onopen = function(event) {  
+      console.log('Connection opened');  
+  };  
+
+  ws.onmessage = function(event) {  
+      console.log('Received message:', event.data);  
+      queueRenderPage(event.data);
+      // alert('hello received from server!');
+
+  };  
+
+  ws.onclose = function(event) {  
+      console.log('Connection closed');  
+  };  
+
+  ws.onerror = function(error) {  
+      console.error('WebSocket Error:', error);  
+  };  
+
+  function sendMessage() {  
+      ws.send('hello'); // 发送任意消息，服务器将回复"hello"  
+  }  
+
+  function queueRenderPage(num) {
+    num = Number(num);
+    console.log('renderpage:',num, typeof num);
+    if (pageRendering) {
+      pageNumPending = num;
+    } else {
+      renderPage(num);
+    }
+  }
+
   /**
-   * Get page info from document, resize canvas accordingly, and render page.
-   * @param num Page number.
+   * Displays previous page.
    */
+  function onPrevPage() {
+    if (pageNum <= 1) {
+      return;
+    }
+    pageNum--;
+    queueRenderPage(pageNum);
+    ws.send(pageNum);
+  }
+  document.getElementById('prev').addEventListener('click', onPrevPage);
+
+  /**
+   * Displays next page.
+   */
+  function onNextPage() {
+    if (pageNum >= pdfDoc.numPages) {
+      return;
+    }
+    pageNum++;
+    queueRenderPage(pageNum);
+    ws.send(pageNum);
+
+  }
+
+  document.getElementById('next').addEventListener('click', onNextPage);
+
   function renderPage(num) {
     pageRendering = true;
     // Using promise to fetch the page
@@ -83,46 +151,6 @@
     document.getElementById('page_num').textContent = num;
   }
 
-  /**
-   * If another page rendering in progress, waits until the rendering is
-   * finished. Otherwise, executes rendering immediately.
-   */
-  function queueRenderPage(num) {
-    if (pageRendering) {
-      pageNumPending = num;
-    } else {
-      renderPage(num);
-    }
-  }
-
-  /**
-   * Displays previous page.
-   */
-  function onPrevPage() {
-    if (pageNum <= 1) {
-      return;
-    }
-    pageNum--;
-    queueRenderPage(pageNum);
-  }
-  document.getElementById('prev').addEventListener('click', onPrevPage);
-
-  /**
-   * Displays next page.
-   */
-  function onNextPage() {
-    if (pageNum >= pdfDoc.numPages) {
-      return;
-    }
-    pageNum++;
-    queueRenderPage(pageNum);
-  }
-  document.getElementById('next').addEventListener('click', onNextPage);
-
-  
-
-
-  
 // 调用 loadPdf 函数  
 var xhr = new XMLHttpRequest();
 var url = window.location.search;
@@ -140,8 +168,7 @@ var loadingTask = pdfjsLib.getDocument(fetch_url);
 pdfDoc = await loadingTask.promise;
 document.getElementById('page_count').textContent = pdfDoc.numPages;
 renderPage(pageNum);
-  
-  </script>
+</script> 
 </body>
 </html>
 
