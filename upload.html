@@ -6,10 +6,51 @@
   <title>PDF.js 文件上传示例</title>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.210/pdf.min.js"></script> -->
   <!-- <script src="../../node_modules/pdfjs-dist/build/pdf.mjs" type="module"></script> -->
+  <script>
+    let ipAddress = '';
 
+    // 异步加载 IP 地址的函数
+    async function fetchIPAddress() {
+        try {
+            // 从配置文件中获取 IP 地址
+            const response = await fetch('public/config.json');
+            if (!response.ok) {
+                throw new Error(`Failed to load config file: ${response.statusText}`);
+            }
+            const config = await response.json();
+
+            // 获取 IP 地址
+            ipAddress = config.server_ip || 'Unknown IP';
+            const port = config.server_port || '';
+
+            // 将 IP 地址显示在页面中
+            const ipElement = document.getElementById('ip-display');
+            ipElement.textContent = `Server IP: ${ipAddress} Port: ${port}`;
+        } catch (error) {
+            console.error('Error fetching IP address:', error);
+            const ipElement = document.getElementById('ip-display');
+            ipElement.textContent = 'Error fetching IP address.';
+        }
+    }
+
+    // 页面加载前调用
+    window.onload = fetchIPAddress;
+</script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    #ip-display {
+        font-size: 1.2em;
+        color: #333;
+    }
+</style>
 </head>
-<body>
-  <h1>PDF.js 文件上传示例</h1>
+<body>    
+  <h1>室内乐重奏总谱翻谱工具</h1>
+  <p id="ip-display">Loading IP address...</p>
+
   <!-- <input type="file" id="pdf-file" accept="application/pdf">
   <input type="file" id="pdf-file" name="pdf-file" accept="application/pdf">
 
@@ -31,7 +72,7 @@
 
     <script>
         var globalVariable = localStorage.getItem('myGlobalVariable');  
-  
+
   if (!globalVariable) {  
     // 如果变量不存在，则设置它的初始值  
     globalVariable = '初始值';  
@@ -60,7 +101,9 @@
     var xhr = new XMLHttpRequest();  
   
     // 设置请求类型和URL  
-    xhr.open('POST', 'http://127.0.0.1:5000/upload', true);  
+    xhr.open('POST', 'http://' + '192.168.0.127' + ':5000/upload', true);  
+
+    
   
     // 设置请求完成后的处理函数  
     xhr.onloadend = function () {  
@@ -71,7 +114,7 @@
         // 假设服务器返回了包含UUID的JSON对象  
         if (response && response.uuid) {  
           // uploadStatus.textContent = '上传成功，UUID: ' + response.uuid;  
-          globalVariable = '上传成功，查看地址: 127.0.0.1:8080/view.html?file=' + response.uuid;  
+          globalVariable = '上传成功，查看地址: '+ ipAddress +':8080/view.html?file=' + response.uuid;  
           localStorage.setItem('myGlobalVariable', globalVariable);  
         } else {  
           uploadStatus.textContent = '上传成功，但未收到UUID。';  
