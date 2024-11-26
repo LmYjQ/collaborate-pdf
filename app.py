@@ -13,23 +13,19 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 _local_ip = None
 
 
-def read_config(file_path):
+def read_config(config_file):
     try:
-        # 打开并读取 JSON 文件
-        with open(file_path, 'r') as file:
-            config = json.load(file)
+        # 打开并读取 ip.js 文件
+        with open(config_file, 'r') as file:
+            ip_str = file.read()
+            ip_str = ip_str.replace('"','').replace(';','').split('=')[1]
         
-        # 提取 IP 地址和端口
-        server_ip = config.get("server_ip", "127.0.0.1")  # 默认值为 127.0.0.1
-        server_port = config.get("server_port", "80")    # 默认值为 80
-        return server_ip, server_port
+        # 提取 IP 地址
+        return ip_str
 
     except FileNotFoundError:
-        print(f"Error: Config file {file_path} not found.")
-        return None, None
-    except json.JSONDecodeError:
-        print(f"Error: Config file {file_path} is not valid JSON.")
-        return None, None
+        print(f"Error: ip.js file not found.")
+        return None
 
 def get_host_ip():
     """
@@ -92,8 +88,8 @@ def add_cors_headers(response):
     
 if __name__ == '__main__':
     # get_host_ip()
-    config_file = "public/config.json"
-    _local_ip, port = read_config(config_file)
+    config_file = "public/ip.js"
+    _local_ip = read_config(config_file)
     print(f'[config]ip:{_local_ip}')
     app.run(debug=True, host=_local_ip)
 
