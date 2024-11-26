@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF.js 文件上传示例</title>
 
-    <script src="./public/ip.js"></script>
+      <script src="./public/ip.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -30,7 +30,7 @@
       <input type="file" id="pdf-file" name="pdf-file" />
       <button type="button" onclick="uploadFile()">上传</button>
     </form>
-    <div id="upload-status">status</div>
+    <div id="upload-status"></div>
 
     <script>
       console.log("ipAddress:", ipAddress);
@@ -43,8 +43,11 @@
         localStorage.setItem("myGlobalVariable", globalVariable);
       }
 
+      var myLink = document.createElement("a");
+      myLink.href = globalVariable;
+      myLink.textContent = "上传成功，查看地址: " + globalVariable;
       var myDiv = document.getElementById("upload-status");
-      myDiv.textContent = globalVariable;
+      myDiv.appendChild(myLink);
 
       function uploadFile() {
         // 获取文件输入元素和上传状态元素
@@ -73,12 +76,11 @@
               var response = JSON.parse(xhr.responseText);
               // 假设服务器返回了包含UUID的JSON对象
               if (response && response.uuid) {
-                // uploadStatus.textContent = '上传成功，UUID: ' + response.uuid;
+                uploadStatus.textContent = '上传成功，UUID: ' + response.uuid;
                 globalVariable =
-                  "上传成功，查看地址: " +
-                  ipAddress +
-                  ":8080/view.html?file=" +
-                  response.uuid;
+                  // "http://" +ipAddress +
+                  // ":8080/
+                  "view.html?file=" +response.uuid;
                 localStorage.setItem("myGlobalVariable", globalVariable);
               } else {
                 uploadStatus.textContent = "上传成功，但未收到UUID。";
